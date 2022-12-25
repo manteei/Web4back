@@ -25,7 +25,7 @@ public class CheckController {
 
     @CrossOrigin
     @PostMapping("/login")
-    public void loging() {}  // needed just to enable cors on /api/login URL
+    public void loging() {}
 
     @CrossOrigin
     @GetMapping("/points")
@@ -49,9 +49,9 @@ public class CheckController {
         long start = System.nanoTime();
         point.setDate(new Date());
 
-        double x = point.getX();
-        double y = point.getY();
-        double r = point.getRadius();
+        Double x = point.getX();
+        Double y = point.getY();
+        Double r = point.getRadius();
         boolean hitResult = (x >= 0 && y <= 0 && x * x + y * y <= r * r) || (x <= 0 && y >= 0 && y - x <= r) || (x <= 0 && y <= 0 && x >= -r && y >= -r);
         point.setHit(hitResult);
 
