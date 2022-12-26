@@ -49,4 +49,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 user.getUsername(), user.getPassword(), new ArrayList<>()
         );
     }
+
+    @Override
+    public User setToken(String refreshtoken, String username) {
+        User user = getUser(username);
+        user.setRefreshtoken(refreshtoken);
+        return saveUser(user);
+       // log.info("Refresh token is update");
+    }
+
+    @Override
+    public User getUserByRefreshToken(String refreshToken) {
+        refreshToken = refreshToken.replace("Bearer ", "");
+        return userRepository.findByRefreshtoken(refreshToken);
+    }
 }

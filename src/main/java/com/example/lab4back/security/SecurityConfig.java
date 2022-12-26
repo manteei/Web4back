@@ -2,6 +2,7 @@ package com.example.lab4back.security;
 
 import com.example.lab4back.security.filters.CustomAuthenticationFilter;
 import com.example.lab4back.security.filters.CustomAuthorizationFilter;
+import com.example.lab4back.security.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -30,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(authenticationManagerBean());
+        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(authenticationManagerBean(), userService);
         filter.setFilterProcessesUrl("/api/login");
         http.cors()
                 .and()

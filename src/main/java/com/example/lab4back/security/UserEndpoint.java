@@ -1,12 +1,9 @@
 package com.example.lab4back.security;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.lab4back.security.model.User;
 import com.example.lab4back.security.services.UserService;
-import com.example.lab4back.utils.Utilities;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -35,6 +31,40 @@ public class UserEndpoint {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+
+    @CrossOrigin
+    @PostMapping ("/user/refresh")
+    private ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response){
+        String token = request.getHeader(AUTHORIZATION);
+        User dbUser = userService.getUserByRefreshToken(token);
+        if (dbUser != null) {
+            Algorithm accessTokenAlgorithm = Algorithm.HMAC256("secret".getBytes());
+            Algorithm refreshTokenAlgorithm = Algorithm.HMAC256("secret".getBytes());
+            String newAccessToken = JWT.create()
+                    .withSubject(dbUser.getUsername())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 30 * 1000))
+                    .withIssuer(request.getRequestURL().toString())
+                    .sign(accessTokenAlgorithm);
+            String newRefreshToken = JWT.create()
+                    .withSubject(dbUser.getUsername())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 365 * 1000))
+                    .withIssuer(request.getRequestURL().toString())
+                    .sign(refreshTokenAlgorithm);
+
+            userService.setToken(newRefreshToken, dbUser.getUsername());
+
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("access_token", newAccessToken);
+            tokens.put("refresh_token", newRefreshToken);
+            response.setContentType(APPLICATION_JSON_VALUE);
+            return ResponseEntity.ok().body(tokens);
+        } else {
+            log.error("Error refreshing token: Invalid refresh token");
+            Map<String, String> error = new HashMap<>();
+            error.put("refresh_token", "Invalid refresh token");
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
 
     @CrossOrigin
     @GetMapping("/user/auth")
