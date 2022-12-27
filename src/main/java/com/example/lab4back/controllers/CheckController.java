@@ -16,9 +16,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Slf4j
 @RequestMapping("/api")
 public class CheckController {
-
     private final PointDataRepository pointDataRepo;
-
     public CheckController(PointDataRepository pointDataRepo) {
         this.pointDataRepo = pointDataRepo;
     }

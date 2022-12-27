@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.lab4back.security.model.User;
 import com.example.lab4back.security.services.UserService;
+import com.example.lab4back.security.token.Token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,26 +34,15 @@ public class UserEndpoint {
     private final PasswordEncoder passwordEncoder;
 
     @CrossOrigin
-    @PostMapping ("/user/refresh")
+    @GetMapping ("/user/refresh")
     private ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response){
         String token = request.getHeader(AUTHORIZATION);
         User dbUser = userService.getUserByRefreshToken(token);
         if (dbUser != null) {
-            Algorithm accessTokenAlgorithm = Algorithm.HMAC256("secret".getBytes());
-            Algorithm refreshTokenAlgorithm = Algorithm.HMAC256("secret".getBytes());
-            String newAccessToken = JWT.create()
-                    .withSubject(dbUser.getUsername())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 30 * 1000))
-                    .withIssuer(request.getRequestURL().toString())
-                    .sign(accessTokenAlgorithm);
-            String newRefreshToken = JWT.create()
-                    .withSubject(dbUser.getUsername())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 365 * 1000))
-                    .withIssuer(request.getRequestURL().toString())
-                    .sign(refreshTokenAlgorithm);
-
+            Token tokenService = new Token();
+            String newAccessToken = tokenService.createAccessToken(dbUser.getUsername(), request);
+            String newRefreshToken = tokenService.createRefreshToken(dbUser.getUsername(), request);
             userService.setToken(newRefreshToken, dbUser.getUsername());
-
             Map<String, String> tokens = new HashMap<>();
             tokens.put("access_token", newAccessToken);
             tokens.put("refresh_token", newRefreshToken);

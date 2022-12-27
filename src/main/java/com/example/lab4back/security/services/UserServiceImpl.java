@@ -55,7 +55,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = getUser(username);
         user.setRefreshtoken(refreshtoken);
         return saveUser(user);
-       // log.info("Refresh token is update");
     }
 
     @Override
