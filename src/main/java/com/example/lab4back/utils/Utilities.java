@@ -6,7 +6,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 public class Utilities {
-
     public static String decodeUsername(String header) {
         String token = header.substring("Bearer ".length());
         Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());

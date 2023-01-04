@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 public class Token {
-    public String createAccessToken(String username, HttpServletRequest request ){
+    public static String createAccessToken(String username, HttpServletRequest request ){
         Algorithm accessTokenAlgorithm = Algorithm.HMAC256("secret".getBytes());
         String access_token = JWT.create()
                 .withSubject(username)
@@ -18,7 +18,7 @@ public class Token {
                 .sign(accessTokenAlgorithm);
         return access_token;
     }
-    public String createRefreshToken(String username, HttpServletRequest request ){
+    public static String createRefreshToken(String username, HttpServletRequest request ){
         Algorithm refreshTokenAlgorithm = Algorithm.HMAC256("secret".getBytes());
         String refresh_token = JWT.create()
                 .withSubject(username)

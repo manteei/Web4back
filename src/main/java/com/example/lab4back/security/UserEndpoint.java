@@ -1,11 +1,8 @@
 package com.example.lab4back.security;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.example.lab4back.security.model.User;
 import com.example.lab4back.security.services.UserService;
 import com.example.lab4back.security.token.Token;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +12,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,9 +34,8 @@ public class UserEndpoint {
         String token = request.getHeader(AUTHORIZATION);
         User dbUser = userService.getUserByRefreshToken(token);
         if (dbUser != null) {
-            Token tokenService = new Token();
-            String newAccessToken = tokenService.createAccessToken(dbUser.getUsername(), request);
-            String newRefreshToken = tokenService.createRefreshToken(dbUser.getUsername(), request);
+            String newAccessToken = Token.createAccessToken(dbUser.getUsername(), request);
+            String newRefreshToken = Token.createRefreshToken(dbUser.getUsername(), request);
             userService.setToken(newRefreshToken, dbUser.getUsername());
             Map<String, String> tokens = new HashMap<>();
             tokens.put("access_token", newAccessToken);
